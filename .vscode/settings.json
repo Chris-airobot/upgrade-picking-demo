@@ -1,0 +1,12 @@
+{
+    "python.autoComplete.extraPaths": [
+        "/home/riot/navigation_ws/devel/lib/python3/dist-packages",
+        "/home/riot/kinova_gen3_lite/devel/lib/python3/dist-packages",
+        "/opt/ros/noetic/lib/python3/dist-packages"
+    ],
+    "python.analysis.extraPaths": [
+        "/home/riot/navigation_ws/devel/lib/python3/dist-packages",
+        "/home/riot/kinova_gen3_lite/devel/lib/python3/dist-packages",
+        "/opt/ros/noetic/lib/python3/dist-packages"
+    ]
+}

@@ -1,0 +1,34 @@
+{
+  "configurations": [
+    {
+      "browse": {
+        "databaseFilename": "${default}",
+        "limitSymbolsToIncludedHeaders": false
+      },
+      "includePath": [
+        "/home/riot/navigation_ws/devel/include/**",
+        "/home/riot/kinova_gen3_lite/devel/include/**",
+        "/opt/ros/noetic/include/**",
+        "/home/riot/kinova_gen3_lite/src/aruco_ros/aruco/include/**",
+        "/home/riot/kinova_gen3_lite/src/aruco_ros/aruco_ros/include/**",
+        "/home/riot/kinova_gen3_lite/src/first_demo/include/**",
+        "/home/riot/kinova_gen3_lite/src/ros_kortex/third_party/gazebo-pkgs/gazebo_grasp_plugin/include/**",
+        "/home/riot/kinova_gen3_lite/src/ros_kortex/third_party/gazebo-pkgs/gazebo_version_helpers/include/**",
+        "/home/riot/kinova_gen3_lite/src/gpd_ros/include/**",
+        "/home/riot/kinova_gen3_lite/src/ros_kortex/kortex_driver/include/**",
+        "/home/riot/kinova_gen3_lite/src/realsense-ros/realsense2_camera/include/**",
+        "/home/riot/kinova_gen3_lite/src/ros_kortex/third_party/roboticsgroup_upatras_gazebo_plugins/include/**",
+        "/home/riot/navigation_ws/src/turtlebot3_simulations/turtlebot3_fake/include/**",
+        "/home/riot/navigation_ws/src/turtlebot3_simulations/turtlebot3_gazebo/include/**",
+        "/home/riot/navigation_ws/src/turtlebot3/turtlebot3_slam/include/**",
+        "/usr/include/**"
+      ],
+      "name": "ROS",
+      "intelliSenseMode": "gcc-x64",
+      "compilerPath": "/usr/bin/gcc",
+      "cStandard": "gnu11",
+      "cppStandard": "c++14"
+    }
+  ],
+  "version": 4
+}
