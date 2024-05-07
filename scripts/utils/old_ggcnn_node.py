@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 import time
 import torch
 import numpy as np
@@ -16,7 +16,7 @@ from cv_bridge import CvBridge
 from sensor_msgs.msg import Image, CameraInfo
 from std_msgs.msg import Float32MultiArray
 
-from original import GGCNN
+# from ggcnn.msg import GGCNN
 from kortex_driver.msg import BaseCyclic_Feedback
 
 
@@ -27,7 +27,6 @@ model = GGCNN()
 # model = torch.load('/home/riot/kinova_gen3_lite/src/ggcnn/models/epoch_50_cornell_statedict.pt')
 model.load_state_dict(torch.load('/home/riot/kinova_gen3_lite/src/ggcnn/models/pretrained/ggcnn_epoch_23_cornell_statedict.pt'))
 
-count = 0
 
 rospy.init_node('ggcnn_detection')
 
@@ -72,7 +71,6 @@ class TimeIt:
 def robot_pos_callback(data: BaseCyclic_Feedback):
     global ROBOT_Z
     ROBOT_Z = data.base.tool_pose_z
-    print(f'ROBOT_Z is {ROBOT_Z}')
 
 def depth_callback(depth_message: Image):
     global model
@@ -118,7 +116,7 @@ def depth_callback(depth_message: Image):
         # Run it through the network.
         depth_crop = np.clip((depth_crop - depth_crop.mean()), -1, 1)
         with graph.as_default():
-            pred_out = model.predict(depth_crop.reshape((1, 300, 300, 1)))
+            pred_out = model.forward(depth_crop.reshape((1, 300, 300, 1)))
 
         points_out = pred_out[0].squeeze()
         points_out[depth_nan] = 0
@@ -206,7 +204,7 @@ def depth_callback(depth_message: Image):
 
 
 
-depth_sub = rospy.Subscriber('/camera/depth/image_meters', Image, depth_callback, queue_size=1)
+depth_sub = rospy.Subscriber('/camera/depth/image_rect_raw', Image, depth_callback, queue_size=1)
 robot_pos_sub = rospy.Subscriber('/kinova_gen3_lite/base_feedback', BaseCyclic_Feedback, robot_pos_callback, queue_size=1)
 
 while not rospy.is_shutdown():
