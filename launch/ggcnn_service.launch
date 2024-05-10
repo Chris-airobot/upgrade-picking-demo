@@ -2,5 +2,10 @@
 <launch>
   <rosparam command="load" file="$(find ggcnn)/cfg/mvp_grasp.yaml" />  
   <rosparam command="load" file="$(find ggcnn)/cfg/ggcnn_service.yaml" />
+  <rosparam command="load" file="$(find ggcnn)/cfg/kinova_controller.yaml" />
+  <include file="$(find first_demo)/launch/setup_435_camera.launch"/>
+  <include file="$(find first_demo)/launch/publish_camera.launch"/>
   <node name="ggcnn_service" pkg="ggcnn" type="ggcnn_service.py" output="screen"/>
+  <!-- <node name="controller_manager" pkg="controller_manager" type="spawner"/> -->
+
 </launch>

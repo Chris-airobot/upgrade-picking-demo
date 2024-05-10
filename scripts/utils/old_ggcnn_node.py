@@ -17,6 +17,7 @@ from sensor_msgs.msg import Image, CameraInfo
 from std_msgs.msg import Float32MultiArray
 
 # from ggcnn.msg import GGCNN
+from models.ggcnn import GGCNN
 from kortex_driver.msg import BaseCyclic_Feedback
 
 

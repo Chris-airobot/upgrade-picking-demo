@@ -25,7 +25,7 @@ from helpers.ros_control import ControlSwitcher
 
 
 class Logger:
-    def __init__(self, output_desc='run', output_dir='~'):
+    def __init__(self, output_desc='run', output_dir='/home/riot/kinova_gen3_lite/src/ggcnn/log'):
         dt = datetime.datetime.now().strftime('%m%d_%H%M%S')
         self.out_file = os.path.join(output_dir, '%s_%s.txt' % (dt, output_desc))
 

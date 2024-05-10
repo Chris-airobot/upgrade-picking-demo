@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 
 from __future__ import division, print_function
 
@@ -9,8 +9,8 @@ import time
 import datetime
 from kortex_driver.msg import BaseCyclic_Feedback
 
-from std_msgs.msg import Int16
-from geometry_msgs.msg import Twist
+from std_msgs.msg import Int16, Header
+from geometry_msgs.msg import Twist, PoseStamped, PoseArray
 # from franka_msgs.msg import FrankaState, Errors as FrankaErrors
 
 from  utils.kinova_commander import KinovaCommander
@@ -27,11 +27,12 @@ Run.log_properties = ['success', 'time', 'quality']
 Experiment.log_properties = ['success_rate', 'mpph']
 
 
-class PandaOpenLoopGraspController(object):
+class OpenLoopGraspController(object):
     """
     Perform open-loop grasps from a single viewpoint using the Panda robot.
     """
     def __init__(self):
+        
         ggcnn_service_name = '/ggcnn_service'
         rospy.wait_for_service(ggcnn_service_name + '/predict')
         self.ggcnn_srv = rospy.ServiceProxy(ggcnn_service_name + '/predict', GraspPrediction)
@@ -42,16 +43,17 @@ class PandaOpenLoopGraspController(object):
         self.curr_velo = Twist()
         self.best_grasp = Grasp()
 
-        self.cs = ControlSwitcher({'moveit': 'position_joint_trajectory_controller',
-                                   'velocity': 'cartesian_velocity_node_controller'})
-        self.cs.switch_controller('moveit')
+        # self.cs = ControlSwitcher({'moveit': 'position_joint_trajectory_controller',
+        #                            'velocity': 'cartesian_velocity_node_controller'})
+        # self.cs.switch_controller('moveit')
+        
         self.kc = KinovaCommander()
 
         self.robot_state = None
         self.ROBOT_ERROR_DETECTED = False
         self.BAD_UPDATE = False
         rospy.Subscriber('/kinova_gen3_lite/base_feedback', BaseCyclic_Feedback , self.__robot_state_callback, queue_size=1)
-
+        self.pose_pub = rospy.Publisher("/pose_viz", PoseArray, queue_size=1)
         # Centre and above the bin
         self.pregrasp_pose = [(rospy.get_param('/grasp_entropy_node/histogram/bounds/x2') + rospy.get_param('/grasp_entropy_node/histogram/bounds/x1'))/2 - 0.03,
                               (rospy.get_param('/grasp_entropy_node/histogram/bounds/y2') + rospy.get_param('/grasp_entropy_node/histogram/bounds/y1'))/2 + 0.10,
@@ -63,11 +65,11 @@ class PandaOpenLoopGraspController(object):
 
         self.experiment = Experiment()
 
-    # def __recover_robot_from_error(self):
-    #     rospy.logerr('Recovering')
-    #     self.kc.recover()
-    #     rospy.logerr('Done')
-    #     self.ROBOT_ERROR_DETECTED = False
+    def __recover_robot_from_error(self):
+        rospy.logerr('Recovering')
+        self.kc.recover()
+        rospy.logerr('Done')
+        self.ROBOT_ERROR_DETECTED = False
 
     def __weight_increase_check(self):
         try:
@@ -78,11 +80,12 @@ class PandaOpenLoopGraspController(object):
         except:
             return input('No weight. Success? [1/0]') == '1'
 
-    def __robot_state_callback(self, msg):
+    def __robot_state_callback(self, msg: BaseCyclic_Feedback):
         self.robot_state = msg
-        # if any(self.robot_state.cartesian_collision):
+        # if any(self.robot_state.base.fault_bank_a or self.robot_state.base.fault_bank_b):
+        #     self.stop()
         #     if not self.ROBOT_ERROR_DETECTED:
-        #         rospy.logerr('Detected Cartesian Collision')
+        #         rospy.logerr('Robot Error Detected')
         #     self.ROBOT_ERROR_DETECTED = True
         # for s in FrankaErrors.__slots__:
         #     if getattr(msg.current_errors, s):
@@ -92,7 +95,7 @@ class PandaOpenLoopGraspController(object):
         #         self.ROBOT_ERROR_DETECTED = True
 
     def __execute_best_grasp(self):
-            self.cs.switch_controller('moveit')
+            # self.cs.switch_controller('moveit')
 
             ret = self.ggcnn_srv.call()
             if not ret.success:
@@ -101,7 +104,30 @@ class PandaOpenLoopGraspController(object):
             self.best_grasp = best_grasp
 
             tfh.publish_pose_as_transform(best_grasp.pose, 'base_link', 'G', 0.5)
+            print(f'Your pose is: {best_grasp.pose}')
+            
+            
 
+
+                
+                
+                
+            grasp_pose_stamped = PoseStamped(
+                pose=best_grasp.pose, header=Header(frame_id="base_link")
+            )
+            self.pose_pub.publish(
+                PoseArray(header=Header(frame_id="base_link"), poses=[best_grasp.pose])
+            )
+            self.kc.move(target=grasp_pose_stamped)
+            
+            
+            
+            
+            
+            
+            
+            
+            
             if input('Continue?') == '0':
                 return False
 
@@ -120,7 +146,7 @@ class PandaOpenLoopGraspController(object):
             # Reset the position
             best_grasp.pose.position.z -= initial_offset + LINK_EE_OFFSET
 
-            self.cs.switch_controller('velocity')
+            # self.cs.switch_controller('velocity')
             v = Twist()
             v.linear.z = -0.05
 
@@ -153,13 +179,14 @@ class PandaOpenLoopGraspController(object):
     def go(self):
         input('Press Enter to Start.')
         while not rospy.is_shutdown():
-            self.cs.switch_controller('moveit')
+            # self.cs.switch_controller('moveit')
             # self.kc.goto_named_pose('grip_ready', velocity=0.25)
             self.kc.init_pose()
-            self.kc.goto_pose(self.pregrasp_pose, velocity=0.25)
+            self.kc.goto_pose(self.pregrasp_pose, velocity=0.5)
+            rospy.sleep(0.5)
             self.kc.move_gripper(1)
 
-            self.cs.switch_controller('velocity')
+            # self.cs.switch_controller('velocity')
 
             run = self.experiment.new_run()
             run.start()
@@ -171,11 +198,11 @@ class PandaOpenLoopGraspController(object):
                 break
 
             # Release Object
-            self.cs.switch_controller('moveit')
+            # self.cs.switch_controller('moveit')
             # self.kc.goto_named_pose('grip_ready', velocity=0.5)
             self.kc.init_pose()
             
-            self.kc.goto_named_pose('drop_box', velocity=0.5)
+            # self.kc.goto_named_pose('drop_box', velocity=0.5)
             self.kc.move_gripper(1)
 
             # Check success using the scales.
@@ -193,5 +220,5 @@ class PandaOpenLoopGraspController(object):
 
 if __name__ == '__main__':
     rospy.init_node('open_loop_grasp')
-    pg = PandaOpenLoopGraspController()
+    pg = OpenLoopGraspController()
     pg.go()

@@ -109,6 +109,9 @@ catkin_package(
 #  CATKIN_DEPENDS rospy std_msgs
 #  DEPENDS system_lib
   CATKIN_DEPENDS message_runtime
+  controller_interface
+  ##message_runtime
+  pluginlib
 )
 
 ###########

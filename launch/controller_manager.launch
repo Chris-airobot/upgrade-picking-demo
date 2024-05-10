@@ -1,0 +1,11 @@
+<launch>
+  <!-- Load the velocity controller -->
+  <rosparam command="load" file="$(find ggcnn)/cfg/kinova_controller.yaml" />
+
+  <!-- Load MoveIt controller -->
+  <node name="controller_manager" pkg="controller_manager" type="spawner" output="screen" args="CartesianVelocityNodeController"/>
+
+  <!-- Start your Python controller switching node -->
+  <!-- <node name="control_switcher" pkg="my_controller" type="control_switcher.py" output="screen" /> -->
+
+</launch>

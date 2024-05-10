@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 import os
 os.environ["ROS_NAMESPACE"] = "/kinova_gen3_lite"
+
 import sys
 import rospy
 import moveit_commander
@@ -32,14 +33,15 @@ class KinovaCommander(object):
         self.robot = moveit_commander.RobotCommander()
 
         # Robot’s internal understanding of the surrounding world
-        self.scene = moveit_commander.PlanningSceneInterface(ns=rospy.get_namespace())
+
+        self.scene = moveit_commander.PlanningSceneInterface("/kinova_gen3_lite")
 
         # Interfaces for planning groups (group of joints) to plan an execute motions
-        self.arm_group = moveit_commander.MoveGroupCommander(self.arm_group_name, ns=rospy.get_namespace())
-        self.gripper_group = moveit_commander.MoveGroupCommander(self.gripper_group_name, ns=rospy.get_namespace())
+        self.arm_group = moveit_commander.MoveGroupCommander(self.arm_group_name, ns="/kinova_gen3_lite")
+        self.gripper_group = moveit_commander.MoveGroupCommander(self.gripper_group_name, ns="/kinova_gen3_lite")
 
         # Ros publisher that is used to display trajectories in Rviz
-        self.display_trajectory_publisher = rospy.Publisher(rospy.get_namespace()+'/move_group/display_planned_path',
+        self.display_trajectory_publisher = rospy.Publisher("/kinova_gen3_lite" +'/move_group/display_planned_path',
                                                     moveit_msgs.msg.DisplayTrajectory,
                                                     queue_size=20)
         
@@ -66,9 +68,10 @@ class KinovaCommander(object):
         
         Args:
         value (float): a value from 0 to 1 to scale the gripper
-        
+        0 means close
+        1 means open
         '''
-        gripper_joint_names = rospy.get_param(rospy.get_namespace() + "gripper_joint_names", [])
+        gripper_joint_names = rospy.get_param("/kinova_gen3_lite/gripper_joint_names", [])
         # We only need one joint name since the rest will respond to one of them
         gripper_joint_name = gripper_joint_names[0]
         

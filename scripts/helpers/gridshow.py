@@ -21,7 +21,7 @@ def gridshow(name, imgs, scales, cmaps, columns, border=10, show=False):
     for i, (img, cmap, scale) in enumerate(zip(imgs, cmaps, scales)):
         if scale is not None:
             img = (np.clip(img, scale[0], scale[1]) - scale[0])/(scale[1]-scale[0])
-        elif img.dtype == np.float:
+        elif img.dtype == np.float64:
             img = (img - img.min())/(img.max() - img.min())
         if cmap is not None:
             imgc = cv2.applyColorMap((img * 255).astype(np.uint8), cmap)

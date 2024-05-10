@@ -1,3 +1,4 @@
+#! /usr/bin/env python3
 import rospy
 import controller_manager_msgs.srv as cm_srv
 
@@ -12,7 +13,9 @@ class ControlSwitcher:
         :param controllers: Dictionary of controllers to manager/switch: {nick_name: controller_full_name}
         :param controller_manager_node: name of controller manager node.
         """
+        
         self.controllers = controllers
+  
         rospy.wait_for_service(controller_manager_node + '/switch_controller')
         rospy.wait_for_service(controller_manager_node + '/list_controllers')
         self.switcher_srv = rospy.ServiceProxy(controller_manager_node + '/switch_controller', cm_srv.SwitchController)
@@ -38,3 +41,9 @@ class ControlSwitcher:
             return res
         else:
             return False
+        
+
+if __name__ == "__main__":
+    cs = ControlSwitcher({'moveit': 'position_joint_trajectory_controller',
+                          'velocity': 'cartesian_velocity_node_controller'})
+    cs.switch_controller('moveit')

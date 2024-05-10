@@ -50,7 +50,8 @@ def execute_grasp():
     # Get the positions.
     msg = rospy.wait_for_message('/ggcnn/out/command', std_msgs.msg.Float32MultiArray)
     d = list(msg.data)
-
+    print(f'your pose is: {d}')
+    input()
     # # Calculate the gripper width.
     # grip_width = d[4]
     # # Convert width in pixels to mm.
