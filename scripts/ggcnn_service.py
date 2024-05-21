@@ -40,7 +40,6 @@ class GGCNNService:
         self.img_crop_size = rospy.get_param('~camera/crop_size')
         self.img_crop_y_offset = rospy.get_param('~camera/crop_y_offset')
         self.cam_fov = rospy.get_param('~camera/fov')
-
         self.counter = 0
         self.curr_depth_img = None
         self.curr_img_time = 0
@@ -77,13 +76,12 @@ class GGCNNService:
         with TimeIt('Total'):
           
             depth = self.curr_depth_img.copy()
-            cv2.imshow("depth image", depth)
-            cv2.waitKey(1)
             camera_pose = self.last_image_pose
+            
             cam_p = camera_pose.position
 
             camera_rot = tft.quaternion_matrix(tfh.quaternion_to_list(camera_pose.orientation))[0:3, 0:3]
-
+            
             # Do grasp prediction
             depth_crop, depth_nan_mask = process_depth_image(depth, self.img_crop_size, 300, return_mask=True, crop_y_offset=self.img_crop_y_offset)
             points, angle, width_img, _ = predict(depth_crop, process_depth=False, depth_nan_mask=depth_nan_mask, filters=(2.0, 2.0, 2.0))
@@ -122,7 +120,6 @@ class GGCNNService:
                      False)
 
             self.img_pub.publish(bridge.cv2_to_imgmsg(show))
-
             return ret
 
 

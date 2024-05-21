@@ -7,5 +7,7 @@
   <include file="$(find first_demo)/launch/publish_camera.launch"/>
   <node name="ggcnn_service" pkg="ggcnn" type="ggcnn_service.py" output="screen"/>
   <!-- <node name="controller_manager" pkg="controller_manager" type="spawner"/> -->
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find ggcnn)/rviz/visualize.rviz"/> 
+
 
 </launch>
